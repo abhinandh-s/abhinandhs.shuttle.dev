@@ -40,10 +40,11 @@ struct PostTemplate {
 async fn index() -> impl axum::response::IntoResponse {
     use std::env;
 
+    tracing::info!("printing CWD..." );
     let cwd = env::current_dir().unwrap();
     tracing::info!("CWD: {}", cwd.display());
 
-    let posts = std::fs::read_dir("./posts")
+    let posts = std::fs::read_dir("posts")
         .unwrap()
         .filter_map(|e| {
             let path = e.ok()?.path();
