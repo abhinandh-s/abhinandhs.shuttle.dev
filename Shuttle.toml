@@ -1,0 +1,10 @@
+# Declare files that should be copied to the runtime image:
+[build]
+assets = [
+  "posts/**",
+  "templates/**"
+]
+
+[deploy]
+deny_dirty = true
+
