@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 axum = "0.8.1"
 askama = "0.14.0"
-shuttle-axum = "0.55.0"
+shuttle-axum = "0.56.0"
 shuttle-runtime = "0.55.0"
 serde = { version = "1.0.217", features = ["derive"] }
 tokio = "1.45.1"
