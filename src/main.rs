@@ -1,25 +1,17 @@
-#![allow(unused)]
-
-use std::fmt::Display;
-
+use abhinandh_s::ArticleTemplate;
 use askama::Template;
 use axum::extract::Path;
 use axum::response::Html;
-use axum::Error;
 use axum::{routing::get, Router};
 use pulldown_cmark::{html::push_html, Parser};
-use serde::{self, Deserialize};
-use tracing::info;
-
-async fn hello_world() -> &'static str {
-    "Hello, world!"
-}
+use tower_http::services::ServeDir;
 
 #[shuttle_runtime::main]
 async fn main() -> shuttle_axum::ShuttleAxum {
     let router = Router::new()
-        .route("/", get(index))
-        .route("/blog/{slug}", get(blog));
+        .route("/", get(index_handler))
+        .route("/articles/{name}", get(article_handler))
+        .nest_service("/static", ServeDir::new("static"));
 
     Ok(router.into())
 }
@@ -27,47 +19,29 @@ async fn main() -> shuttle_axum::ShuttleAxum {
 #[derive(Template)]
 #[template(path = "index.html")]
 struct IndexTemplate {
-    posts: Vec<String>, // slugs or titles
+    articles: Vec<String>,
 }
 
-#[derive(Template)]
-#[template(path = "post.html")]
-struct PostTemplate {
-    title: String,
-    content: String,
+async fn index_handler() -> Html<String> {
+    let paths = std::fs::read_dir("articles").unwrap();
+    let mut articles = Vec::new();
+
+    for entry in paths.flatten() {
+        if let Some(name) = entry.path().file_stem() {
+            articles.push(name.to_string_lossy().to_string());
+        }
+    }
+
+    let template = IndexTemplate { articles };
+    Html(template.render().unwrap())
 }
 
-async fn index() -> impl axum::response::IntoResponse {
-    use std::env;
-
-    tracing::info!("printing CWD..." );
-    let cwd = env::current_dir().unwrap();
-    tracing::info!("CWD: {}", cwd.display());
-
-    let posts = std::fs::read_dir("posts")
-        .unwrap()
-        .filter_map(|e| {
-            let path = e.ok()?.path();
-            path.file_stem().map(|s| s.to_string_lossy().to_string())
-        })
-        .collect::<Vec<_>>();
-
-    let rendered = IndexTemplate { posts }.render().unwrap();
-    Html(rendered) // ✅ This tells Axum to send HTML content
-}
-
-async fn blog(Path(slug): Path<String>) -> impl axum::response::IntoResponse {
-    let path = format!("posts/{}.md", slug);
-    let markdown = std::fs::read_to_string(&path).unwrap_or("Post not found".into());
-
-    let parser = pulldown_cmark::Parser::new(&markdown);
-    let mut html_output = String::new();
-    pulldown_cmark::html::push_html(&mut html_output, parser);
-
-    let post = PostTemplate {
-        title: slug,
-        content: html_output,
-    };
-
-    Html(post.render().unwrap())
+async fn article_handler(Path(name): Path<String>) -> impl axum::response::IntoResponse {
+    let file_path = format!("articles/{}.md", name);
+    let md = std::fs::read_to_string(&file_path).unwrap_or_else(|_| "# Not Found".to_owned());
+    let parser = Parser::new(&md);
+    let mut content = String::new();
+    push_html(&mut content, parser);
+    let template = ArticleTemplate::new(name, content);
+    Html(template.render().unwrap())
 }

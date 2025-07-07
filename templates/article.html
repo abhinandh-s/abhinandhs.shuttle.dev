@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class= "px-4 mx-auto max-w-3xl" >
+<h1 class="text-3xl font-bold mb-4">{{ title }}</h1>
+<div class="prose">{{ content | safe }}</div>
+  </div>
+<a href="/" class="just-red">← Back</a>
+{% endblock %}
+
