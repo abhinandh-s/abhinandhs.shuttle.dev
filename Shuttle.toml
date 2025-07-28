@@ -1,7 +1,7 @@
 # Declare files that should be copied to the runtime image:
 [build]
 assets = [
-  "posts/**",
+  "articles/**",
   "templates/**"
 ]
 
