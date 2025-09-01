@@ -13,5 +13,5 @@ tokio = "1.47.1"
 tower-http = { version = "0.6.6", features = ["fs"]}
 thiserror = "2.0.16"
 tracing = "0.1.41"
-tracing-subscriber = "0.3.19"
+tracing-subscriber = "0.3.20"
 pulldown-cmark = "0.13"
