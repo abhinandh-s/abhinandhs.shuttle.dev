@@ -10,7 +10,7 @@ shuttle-axum = "0.57.0"
 shuttle-runtime = "0.57.0"
 serde = { version = "1.0.228", features = ["derive"] }
 tokio = "1.48.0"
-tower-http = { version = "0.6.6", features = ["fs"]}
+tower-http = { version = "0.6.7", features = ["fs"]}
 thiserror = "2.0.17"
 tracing = "0.1.41"
 tracing-subscriber = "0.3.20"
